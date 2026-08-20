@@ -291,7 +291,12 @@ try{
 
 // Catch the result when the page reloads after coming back from Google's sign-in screen
 if(auth){
-  getRedirectResult(auth).catch((e)=>{ console.warn('Redirect sign-in failed:', e); });
+  getRedirectResult(auth).then((result)=>{
+    if(result && result.user){ window.__cloud.toast('✅ Signed in as '+(result.user.displayName||result.user.email)); }
+  }).catch((e)=>{
+    console.warn('Redirect sign-in failed:', e);
+    window.__cloud.toast('❌ Sign-in error: '+e.code+' — '+e.message);
+  });
 }
 
 // Bridge object the main app script (below, non-module) talks to.
