@@ -270,7 +270,7 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 // 6. In Authentication > Settings > Authorized domains, add your GitHub Pages domain (e.g. yourusername.github.io)
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -289,6 +289,11 @@ try{
   db = getFirestore(fbApp);
 }catch(e){ console.warn('Firebase not configured yet:', e); }
 
+// Catch the result when the page reloads after coming back from Google's sign-in screen
+if(auth){
+  getRedirectResult(auth).catch((e)=>{ console.warn('Redirect sign-in failed:', e); });
+}
+
 // Bridge object the main app script (below, non-module) talks to.
 window.__cloud = {
   signedIn: false,
@@ -300,7 +305,7 @@ window.__cloud = {
     }
     try{
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      await signInWithRedirect(auth, provider);
     }catch(e){ window.__cloud.toast('Sign-in failed: '+e.message); }
   },
   save: async function(stateObj){
